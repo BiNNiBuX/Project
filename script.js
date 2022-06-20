@@ -49,7 +49,7 @@ var GAME = {
 var BOSS = {
     x: GAME.width + 10,
     y: 250, 
-    lives: 100,
+    lives: 10,
     height: 435,
     width: 105,
     speed: 1,
