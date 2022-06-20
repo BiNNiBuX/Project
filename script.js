@@ -3,8 +3,10 @@ var canvasContext = canvas.getContext("2d");
 var MONSTERS = [];
 var PBULLETS = [];
 var MBULLETS = [];
+var BBULLETS = [];
 var nob = 2;
 var b = 0;
+var bb = 0;
 var mb = 0;
 var ex = 1;
 var countOfMONSTERS = 6;
@@ -15,25 +17,42 @@ var monsterWidth = 61;
 var bulletHeight = 4;
 var bulletWidth = 6;
 var pPic = new Image();
-pPic.src = 'images/ship2.png'
+var bbPic = new Image();
+bbPic.src = 'images/bossB.png';
+pPic.src = 'images/ship2.png';
 var mPic1 = new Image();
 var mPic2 = new Image();
 var mPic3 = new Image();
 var mPic4 = new Image();
-mPic1.src = 'images/Exhaust/ship11.png'
-mPic2.src = 'images/Exhaust/ship12.png'
-mPic3.src = 'images/Exhaust/ship13.png'
-mPic4.src = 'images/Exhaust/ship14.png'
+var bPic = new Image();
+bPic.src = 'images/boss.png'
+mPic1.src = 'images/Exhaust/ship11.png';
+mPic2.src = 'images/Exhaust/ship12.png';
+mPic3.src = 'images/Exhaust/ship13.png';
+mPic4.src = 'images/Exhaust/ship14.png';
 var backGd = new Image();
-backGd.src = 'images/backGd.png'
+backGd.src = 'images/backGd.png';
 const maxB = 100;
 
 var GAME = {
     width: 1280,
     height: 720,
     over: false,
+    boss: false,
+    win: false,
     score: 0,
     backGd: new Image(),
+}
+
+var BOSS = {
+    x: GAME.width + 10,
+    y: 250, 
+    lives: 100,
+    height: 435,
+    width: 105,
+    speed: 1,
+    bPic: new Image(),
+    side: "up",
 }
 
 var PLAYER = {
@@ -55,6 +74,10 @@ var PBULLET = {
 
 canvas.width = GAME.width;
 canvas.height = GAME.height;
+
+bPic.onload = function () {
+    BOSS.bPic = bPic;
+}
 
 backGd.onload = function () {
     GAME.backGd = backGd;
@@ -118,6 +141,20 @@ function initPBullets() {
     }
 }
 
+function initBBullets() {
+    for (let i = 0; i < maxB; i++) {
+        BBULLETS[i] = {
+            x: 0,
+            y: GAME.width,
+            speed: 10,
+            height: 20,
+            width: 30,
+            speed: -15,
+            bbPic: new Image(),
+        }
+    }
+}
+
 function initMonsters() {
     for (let i = 0; i < countOfMONSTERS; i++) {
         var initX = GAME.width + i * 200;
@@ -132,6 +169,30 @@ function initMonsters() {
             mPic3: new Image(),
             mPic4: new Image(),
         }
+    }
+}
+
+function bossMove() {
+    if (GAME.boss){
+        if (BOSS.side === "up"){
+            if (BOSS.y > 0){
+                BOSS.y -= BOSS.speed;
+            } else {
+                BOSS.side = "down"
+            }
+        } else {
+            if (BOSS.y < GAME.height - BOSS.height){
+                BOSS.y += BOSS.speed;
+            } else {
+                BOSS.side = "up"
+            }
+        }
+    }
+}
+
+bbPic.onload = function () {
+    for (let i = 0; i < maxB; i++) {
+        BBULLETS[i].bbPic = bbPic;
     }
 }
 
@@ -162,6 +223,25 @@ function respawnMonster(i) {
     MONSTERS[i].lives = 3;
 }
 
+function bossShoot() {
+    if (bb >= maxB){
+        bb = 0;
+    }
+    BBULLETS[bb].x = BOSS.x;
+    BBULLETS[bb].y = BOSS.y + 300;
+    bb++;
+    BBULLETS[bb].x = BOSS.x;
+    BBULLETS[bb].y = BOSS.y + 210;
+    bb++;
+    BBULLETS[bb].x = BOSS.x;
+    BBULLETS[bb].y = BOSS.y + 45;
+    bb++;
+    BBULLETS[bb].x = BOSS.x;
+    BBULLETS[bb].y = BOSS.y + 130;
+    bb++;
+}
+
+
 function monstersShoot() {
     for (let i = 0; i < countOfMONSTERS; i++){
         if (mb >= maxB){
@@ -175,16 +255,23 @@ function monstersShoot() {
 
 function drawPBullet() {
     for (let i = 0; i < maxB; i++){
-        canvasContext.fillStyle = "red";
+        canvasContext.fillStyle = "purple";
         canvasContext.fillRect(PBULLETS[i].x, PBULLETS[i].y, PBULLETS[i].width, PBULLETS[i].height);
     }
 }
 
 function drawMBullet() {
     for (let i = 0; i < maxB; i++){
-        canvasContext.fillStyle = "green";
+        canvasContext.fillStyle = "red";
         canvasContext.fillRect(MBULLETS[i].x, MBULLETS[i].y, MBULLETS[i].width, MBULLETS[i].height);
         
+    }
+}
+
+function drawBBullet() {
+    for (let i = 0; i < maxB; i++){
+        canvasContext.fillStyle = "yellow";
+        canvasContext.drawImage(BBULLETS[i].bbPic, BBULLETS[i].x, BBULLETS[i].y, BBULLETS[i].width, BBULLETS[i].height);
     }
 }
 
@@ -214,14 +301,37 @@ function drawMonster() {
     }
 }
 
+function drawBoss() {
+    if (BOSS.bPic) {
+        canvasContext.drawImage(BOSS.bPic, BOSS.x, BOSS.y, BOSS.width, BOSS.height);
+    }
+}
+
+function releaseTheKraken() {
+    if ((GAME.boss) &&(BOSS.x > GAME.width - BOSS.width)){
+        BOSS.x -= BOSS.speed;
+        console.log(BOSS.x, GAME.width)
+    }
+}
+
 function updateFrame() {
     frames++;
     ex++;
+    bossMove();
+    if (GAME.score === 10){
+        GAME.boss = true;
+    }
+    if (BOSS.lives <= 0){
+        GAME.win = true;
+    }
     if (ex === 9) {
         ex = 1;
     }
     if (frames === 90) {
         monstersShoot();
+        if (GAME.boss === true){
+            bossShoot();
+        }
         frames = 0;
     }
     for (let i = 0; i < countOfMONSTERS; i++) {
@@ -256,6 +366,7 @@ function updateFrame() {
         }
         if (MONSTERS[i].lives === 0) {
             respawnMonster(i);
+            GAME.score++;
         }
     }
 
@@ -269,9 +380,10 @@ function updateFrame() {
         if (MBULLETS[i].y < GAME.height) {
             MBULLETS[i].x += MBULLETS[i].speed;
         }
-        var losePositionX = MBULLETS[i].x <= PLAYER.x + PLAYER.width;
-        var losePositionY = (PLAYER.y <= MBULLETS[i].y) && (PLAYER.y + PLAYER.height >= MBULLETS[i].y);
-        var miss = MBULLETS[i].x <= -MBULLETS[i].width;
+        BBULLETS[i].x += BBULLETS[i].speed;
+        losePositionX = MBULLETS[i].x <= PLAYER.x + PLAYER.width;
+        losePositionY = (PLAYER.y <= MBULLETS[i].y) && (PLAYER.y + PLAYER.height >= MBULLETS[i].y);
+        miss = MBULLETS[i].x <= -MBULLETS[i].width;
         if (miss) {
             MBULLETS[i].y = GAME.width;
             MBULLETS[i].x = 0;
@@ -283,6 +395,32 @@ function updateFrame() {
             if (PLAYER.lives === 0) {
                 GAME.over = true;
             }
+        }
+        losePositionX = BBULLETS[i].x <= PLAYER.x + PLAYER.width;
+        losePositionY = (PLAYER.y <= BBULLETS[i].y) && (PLAYER.y + PLAYER.height >= BBULLETS[i].y);
+        miss = BBULLETS[i].x <= -BBULLETS[i].width;
+        if (miss) {
+            BBULLETS[i].y = GAME.width;
+            BBULLETS[i].x = 0;
+        }
+        if (losePositionX && losePositionY) {
+            PLAYER.lives -= 1;
+            BBULLETS[i].y = GAME.width;
+            BBULLETS[i].x = 0;
+            if (PLAYER.lives === 0) {
+                GAME.over = true;
+            }
+        }
+    }
+
+    for (let i = 0; i < maxB; i++){
+        losePositionX = (PBULLETS[i].x >= BOSS.x) && (PBULLETS[i].x <= BOSS.x + BOSS.width);
+        losePositionY = (BOSS.y <= PBULLETS[i].y) && (BOSS.y + BOSS.height >= PBULLETS[i].y);
+        if (losePositionX && losePositionY) {
+            BOSS.lives--;
+            console.log(BOSS.lives);
+            PBULLETS[i].y = GAME.width;
+            nob++;
         }
     }
 }
@@ -301,25 +439,33 @@ function drawPlayer() {
 
 function drawFrame() {
     drawBackground();
+    releaseTheKraken()
+    drawBoss();
     drawPlayer();
     drawMonster();
     drawPBullet();
     drawMBullet();
+    drawBBullet();
 }
 
 function play() {
-    if (GAME.over !== true) {
+    if ((GAME.over !== true) && (GAME.win !== true)) {
         drawFrame();
         updateFrame();
         requestAnimationFrame(play);
     } else {
         drawFrame();
-        alert("Game Over")
+        if (GAME.over) {
+            alert("Game Over")
+        } else {
+            alert("You win")
+        }
     }
 }
 
 initMBullets();
 initPBullets();
+initBBullets();
 initMonsters();
 initEventListeners();
 play();
