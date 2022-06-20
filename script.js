@@ -25,6 +25,8 @@ var mPic2 = new Image();
 var mPic3 = new Image();
 var mPic4 = new Image();
 var bPic = new Image();
+var livesPic = new Image();
+livesPic.src = 'images/livesPic.png'
 bPic.src = 'images/boss.png'
 mPic1.src = 'images/Exhaust/ship11.png';
 mPic2.src = 'images/Exhaust/ship12.png';
@@ -72,8 +74,14 @@ var PBULLET = {
     width: 6,
 }
 
+var InfoWindow = {
+    livesPic: new Image(),
+    width: GAME.width,
+    height: 50,
+}
+
 canvas.width = GAME.width;
-canvas.height = GAME.height;
+canvas.height = GAME.height + InfoWindow.height;
 
 bPic.onload = function () {
     BOSS.bPic = bPic;
@@ -190,6 +198,10 @@ function bossMove() {
     }
 }
 
+livesPic.onload = function() {
+    InfoWindow.livesPic = livesPic;
+}
+
 bbPic.onload = function () {
     for (let i = 0; i < maxB; i++) {
         BBULLETS[i].bbPic = bbPic;
@@ -214,6 +226,14 @@ mPic3.onload = function () {
 mPic4.onload = function () {
     for (let i = 0; i < countOfMONSTERS; i++) {
         MONSTERS[i].mPic4 = mPic4;
+    }
+}
+
+function drawInfoWindow() {
+    canvasContext.fillStyle = "grey";
+    canvasContext.fillRect(0, GAME.height, InfoWindow.width, InfoWindow.height);
+    for (let i = 0; i < PLAYER.lives; i++){
+        canvasContext.drawImage(InfoWindow.livesPic, 20 + i * 20, GAME.height + 10);
     }
 }
 
@@ -439,7 +459,8 @@ function drawPlayer() {
 
 function drawFrame() {
     drawBackground();
-    releaseTheKraken()
+    drawInfoWindow();
+    releaseTheKraken();
     drawBoss();
     drawPlayer();
     drawMonster();
