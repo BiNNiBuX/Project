@@ -26,7 +26,6 @@ mPic3.src = 'images/Exhaust/ship13.png'
 mPic4.src = 'images/Exhaust/ship14.png'
 var backGd = new Image();
 backGd.src = 'images/backGd.png'
-
 const maxB = 100;
 
 var GAME = {
